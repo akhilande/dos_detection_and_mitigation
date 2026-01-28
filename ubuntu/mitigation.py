@@ -1,9 +1,4 @@
 #!/usr/bin/env python3
-"""
-DoS Mitigation - Detects attack and blocks attacker IP using iptables
-Auto-unblocks after timeout, cleans up on exit
-"""
-
 import signal
 import sys
 import time
@@ -11,18 +6,18 @@ import subprocess
 from collections import defaultdict
 
 LOG_FILE = 'request_log.txt'
-THRESHOLD = 50         # Requests to trigger block
-TIME_WINDOW = 5        # Seconds to look back
-INTERVAL = 2           # Check every 2 seconds
-BLOCK_TIME = 60        # Block duration in seconds
-blocked_ips = {}       # {ip: unblock_time}
+THRESHOLD = 50         
+TIME_WINDOW = 5        
+INTERVAL = 2           
+BLOCK_TIME = 60        
+blocked_ips = {}       
 running = True
 
 def cleanup(sig=None, frame=None):
     print("\n[!] Cleaning up iptables...")
     for ip in list(blocked_ips.keys()):
         unblock_ip(ip)
-    print("[+] All rules removed. Clean exit.")
+    print("All rules removed. Clean exit.")
     sys.exit(0)
 
 signal.signal(signal.SIGINT, cleanup)
@@ -32,14 +27,14 @@ def block_ip(ip):
     cmd = f"iptables -A INPUT -s {ip} -j DROP"
     subprocess.run(cmd, shell=True)
     blocked_ips[ip] = time.time() + BLOCK_TIME
-    print(f"    🛡️ BLOCKED: {ip} for {BLOCK_TIME}s")
+    print(f"BLOCKED: {ip} for {BLOCK_TIME}s")
 
 def unblock_ip(ip):
     cmd = f"iptables -D INPUT -s {ip} -j DROP"
     subprocess.run(cmd, shell=True, stderr=subprocess.DEVNULL)
     if ip in blocked_ips:
         del blocked_ips[ip]
-    print(f"    🔓 UNBLOCKED: {ip}")
+    print(f" UNBLOCKED: {ip}")
 
 def check_unblock():
     current = time.time()
@@ -82,9 +77,9 @@ def monitor():
         for ip, count in counts.items():
             if ip in blocked_ips:
                 remain = int(blocked_ips[ip] - time.time())
-                print(f"    🚫 {ip} -> BLOCKED ({remain}s left)")
+                print(f"    {ip} -> BLOCKED ({remain}s left)")
             elif count >= THRESHOLD:
-                print(f"    🚨 ATTACK: {ip} -> {count} requests")
+                print(f"     ATTACK: {ip} -> {count} requests")
                 block_ip(ip)
             else:
                 print(f"    ✓ {ip} -> {count} requests")
