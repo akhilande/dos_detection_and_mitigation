@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-Weak HTTP Server with logging - Logs all requests to file
-"""
-
 import socket
 import signal
 import sys
