@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DoS Lab - Target Website</title>
+    <style>
+        /* Bright gradient background */
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Main container with animation */
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px 60px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: floatUp 3s ease-in-out infinite;
+        }
+
+        /* Float animation */
+        @keyframes floatUp {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        /* Title with color animation */
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96e6a1, #ff6b6b);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 4s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Live clock display */
+        .clock {
+            font-size: 3.5em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 20px 0;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #74ebd5, #acb6e5);
+            border-radius: 15px;
+            font-family: 'Courier New', monospace;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(116, 235, 213, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(116, 235, 213, 0.8); }
+        }
+
+        /* Request counter box */
+        .counter-box {
+            margin: 20px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            border-radius: 15px;
+            animation: shake 0.5s ease-in-out infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: rotate(-1deg); }
+            50% { transform: rotate(1deg); }
+        }
+
+        .counter-label {
+            font-size: 1.2em;
+            color: #6c5ce7;
+            font-weight: bold;
+        }
+
+        .counter-value {
+            font-size: 2.5em;
+            color: #e84393;
+            font-weight: bold;
+        }
+
+        /* Status indicator */
+        .status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .status-dot {
+            width: 15px;
+            height: 15px;
+            background: #00ff00;
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .status-text {
+            font-size: 1.1em;
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        /* Floating particles background */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* Info box */
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #dfe6e9;
+            border-radius: 10px;
+            font-size: 0.9em;
+            color: #636e72;
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Main content -->
+    <div class="container">
+        <h1>🎯 DoS Lab Target Server</h1>
+        <p style="color: #7f8c8d; font-size: 1.1em;">Cybersecurity Educational Project</p>
+        
+        <!-- Live Digital Clock -->
+        <div class="clock" id="clock">00:00:00</div>
+        
+        <!-- Request Counter -->
+        <div class="counter-box">
+            <div class="counter-label">📊 Page Requests</div>
+            <div class="counter-value" id="counter">0</div>
+        </div>
+        
+        <!-- Server Status -->
+        <div class="status">
+            <div class="status-dot"></div>
+            <span class="status-text">Server Online</span>
+        </div>
+        
+        <!-- Info -->
+        <div class="info">
+            <strong>Server IP:</strong> 192.168.56.101 | 
+            <strong>Last Update:</strong> <span id="lastUpdate">-</span>
+        </div>
+    </div>
+
+    <script>
+        // ===== LIVE DIGITAL CLOCK (updates every second) =====
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('clock').textContent = hours + ':' + minutes + ':' + seconds;
+        }
+        
+        // Update clock every 1 second
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // ===== REQUEST COUNTER (dynamic element) =====
+        let requestCount = 0;
+        
+        function updateCounter() {
+            requestCount++;
+            document.getElementById('counter').textContent = requestCount;
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+        }
+        
+        // Increment counter every 2 seconds
+        setInterval(updateCounter, 2000);
+        updateCounter();
+
+        // ===== FLOATING PARTICLES =====
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDuration = (Math.random() * 5 + 5) + 's';
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                particle.style.width = (Math.random() * 10 + 5) + 'px';
+                particle.style.height = particle.style.width;
+                container.appendChild(particle);
+            }
+        }
+        
+        createParticles();
+        console.log('DoS Lab Target Website Loaded!');
+    </script>
+</body>
+</html>
